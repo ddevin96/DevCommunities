@@ -18,6 +18,7 @@ export myfindcommunities, community_detection
 export check_hgs_labelled
 export temporal_communities, communities_between_trimesters
 export t_communities_aggregation_reddit #, t_communities_aggregation_stackoverflow
+export quantiles
 
 include("utils.jl")
 include("lp.jl")

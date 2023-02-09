@@ -345,6 +345,21 @@ function community_detection(hgs)
     return communities
 end
 
+function quantiles(cds, name_dataset)
+    open("results/" * name_dataset * "/quantiles.txt", "w") do io
+        write(io, "quantiles 0.25 0.5 0.75 0.9\n")
+        for i in 1:8
+            size_communities = length.(cds[i].np)
+            v = quantile(size_communities, [0.25, 0.5, 0.75, 0.9])
+            write(io, "trim$i\t")
+            for j in 1:4
+                write(io, string(v[j]) * " ")
+            end
+            write(io, "\n")
+        end
+    end
+end
+
 # temporal_communities(cds, 0.05) # 5% of top communities
 function temporal_communities(communities, perc)
     temporal_comms = []
@@ -432,7 +447,8 @@ function communities_between_trimesters(all_communities_aggregated, hgs)
                     pre_comm = unique(pre_comm)
                     post_comm = unique(post_comm)
                     intersezione = intersect(pre_comm, post_comm)
-                    # println("Tag ", k, " ", length(all_communities_aggregated[trim][k]), " - ", length(all_communities_aggregated[trim+1][k]), " Intersezione ", length(intersezione))
+                    perc = length(intersezione) / length(pre_comm)
+                    #  TAG || LENGTH(PRE_COMM) || LENGTH(POST_COMM) || LENGTH(INTERSECTION) || PERC
                     write(io, k)
                     write(io, ",")
                     write(io, string(length(pre_comm)))
@@ -440,6 +456,8 @@ function communities_between_trimesters(all_communities_aggregated, hgs)
                     write(io, string(length(post_comm)))
                     write(io, ",")
                     write(io, string(length(intersezione)))
+                    write(io, ",")
+                    write(io, string(perc))
                     write(io, "\n")
                 end
             end
