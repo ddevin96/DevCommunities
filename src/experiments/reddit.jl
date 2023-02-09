@@ -50,9 +50,15 @@ communities_between_trimesters(all_communities_aggregated, hgs_reddit_labelled)
 ## stats
 ## 
 
-# size hypergraphs
+# operations on hgs
 # dimension_hgs_bar_chart(hgs_reddit)
 # size_distribution_chart(hgs_reddit)
 # degree_distribution_chart(hgs_reddit)
 
+# operations on dfs processed
+# popularity_reddit(dfs_processed_reddit)
+# total_user_x_subreddit(dfs_processed_reddit)
+# user_x_tag_over_time_reddit(dfs_processed_reddit)
+# span_hours_reddit(dfs_processed_reddit)
+# mean_total_comment_reddit(dfs_processed_reddit)
 
