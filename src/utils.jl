@@ -433,6 +433,67 @@ function t_communities_aggregation_reddit(temporal_comms, percentages, my_tags, 
     return all_communities_aggregated
 end
 
+function t_communities_aggregation_stackoverflow(temporal_comms, percentages, my_tags, dfs_processed_stackoverflow)
+    all_tags = []
+    for trim in 1:8
+        tags = Dict()
+        for i in 1:percentages[trim]
+            temporal_community = temporal_comms[trim][i]
+            tag_d = Dict()
+            for user in temporal_community
+                # retrieve all the tags of the user
+                mydf = dfs_processed_stackoverflow[trim]
+                # display(mydf)
+                temp_df = mydf[mydf.new_id .== user, :]
+                temp_df2 = mydf[mydf.q_new_id .== user, :]
+                temp_df = vcat(temp_df, temp_df2)
+                # retrieve all the tags of the user
+                for x in temp_df.tags
+                    for tag in my_tags
+                        if occursin(tag, x)
+                            if !haskey(tag_d, tag)
+                                tag_d[tag] = 0
+                            end
+                            tag_d[tag] += 1
+                        end
+                    end
+                end
+            end
+            max_tag = ""
+            max_tag_count = 0
+            for (k, v) in tag_d
+                if v > max_tag_count
+                    max_tag = k
+                    max_tag_count = v
+                end
+            end
+            if max_tag == ""
+                continue
+            end
+            if !haskey(tags, max_tag)
+                tags[max_tag] = []
+            end
+            # append the community to the tag
+            push!(tags[max_tag], temporal_community)
+        end
+        push!(all_tags, tags)
+    end    
+
+    all_communities_aggregated = []
+    for trim in 1:8
+        communities_aggregated = Dict()
+        for (k, v) in all_tags[trim]
+            if !haskey(communities_aggregated, k)
+                communities_aggregated[k] = Set()
+            end
+            for community in v
+                communities_aggregated[k] = union(communities_aggregated[k], community)
+            end            
+        end
+        push!(all_communities_aggregated, communities_aggregated)
+    end
+    return all_communities_aggregated, all_tags
+end
 # confront the tags of each community between consecutive trimester
 function communities_between_trimesters(all_communities_aggregated, hgs)
     for trim in 1:7
