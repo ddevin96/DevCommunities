@@ -28,3 +28,5 @@ cds_stackoverflow = community_detection(hgs_stackoverflow_labelled)
 # end
 
 ############################################
+
+my_tags = ["rust" "elixir" "clojure" "typescript" "julia" "python" "delphi" "go" "sql" "c#" "kotlin" "swift" "dart" "html" "solidity" "javascript" "f#" "bash" "lisp" "apl"]
