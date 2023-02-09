@@ -49,17 +49,23 @@ end
 
 # confront the tags of each community between consecutive trimester
 for trim in 1:7
-    open("results/redditsankeytrim"*string(trim)*"trim"*string(trim+1)*".txt", "w") do io
+    open("results/reddit/redditsankeytrim"*string(trim)*"trim"*string(trim+1)*".txt", "w") do io
         write(io, "intersection\n")
         for (k, v) in all_communities_aggregated[trim]
             if haskey(all_communities_aggregated[trim+1], k)
-                intersezione = intersect(all_communities_aggregated[trim][k], all_communities_aggregated[trim+1][k])
+                pre_comm = all_communities_aggregated[trim][k]
+                post_comm = all_communities_aggregated[trim+1][k]
+                pre_comm = [get_vertex_meta(hgs_reddit_labelled[trim], elem) for elem in pre_comm]
+                post_comm = [get_vertex_meta(hgs_reddit_labelled[trim+1], elem) for elem in post_comm]
+                pre_comm = unique(pre_comm)
+                post_comm = unique(post_comm)
+                intersezione = intersect(pre_comm, post_comm)
                 # println("Tag ", k, " ", length(all_communities_aggregated[trim][k]), " - ", length(all_communities_aggregated[trim+1][k]), " Intersezione ", length(intersezione))
                 write(io, k)
                 write(io, ",")
-                write(io, string(length(all_communities_aggregated[trim][k])))
+                write(io, string(length(pre_comm)))
                 write(io, ",")
-                write(io, string(length(all_communities_aggregated[trim+1][k])))
+                write(io, string(length(post_comm)))
                 write(io, ",")
                 write(io, string(length(intersezione)))
                 write(io, "\n")
@@ -70,9 +76,17 @@ for trim in 1:7
         # find how many user move from each community to another
         for (k, v) in all_communities_aggregated[trim]
             if haskey(all_communities_aggregated[trim+1], k)
-                possible_moved = setdiff(all_communities_aggregated[trim][k], all_communities_aggregated[trim+1][k])
+                pre_comm = all_communities_aggregated[trim][k]
+                post_comm = all_communities_aggregated[trim+1][k]
+                pre_comm = [get_vertex_meta(hgs_reddit_labelled[trim], elem) for elem in pre_comm]
+                post_comm = [get_vertex_meta(hgs_reddit_labelled[trim+1], elem) for elem in post_comm]
+                pre_comm = unique(pre_comm)
+                post_comm = unique(post_comm)
+                possible_moved = setdiff(pre_comm, post_comm)
                 for (k2, v2) in all_communities_aggregated[trim+1]
-                    intersezione = intersect(possible_moved, all_communities_aggregated[trim+1][k2])
+                    pp_comm = all_communities_aggregated[trim+1][k2]
+
+                    intersezione = intersect(possible_moved, pp_comm)
                     if length(intersezione) > 0
                         # println("MOving from ", k, " ", length(possible_moved), " to ", k2, " ", length(all_communities_aggregated[trim+1][k2]), " Intersezione ", length(intersezione))
                         write(io, k)
@@ -81,7 +95,7 @@ for trim in 1:7
                         write(io, ",")
                         write(io, k2)
                         write(io, ",")
-                        write(io, string(length(all_communities_aggregated[trim+1][k2])))
+                        write(io, string(length(pp_comm)))
                         write(io, ",")
                         write(io, string(length(intersezione)))
                         write(io, "\n")
@@ -96,10 +110,14 @@ for trim in 1:7
         set_user1 = Set()
         set_user2 = Set()
         for (k, v) in all_communities_aggregated[trim]
-            set_user1 = union(set_user1, all_communities_aggregated[trim][k])
+            pre_comm = all_communities_aggregated[trim][k]
+            pre_comm = [get_vertex_meta(hgs_reddit_labelled[trim], elem) for elem in pre_comm]
+            set_user1 = union(set_user1, pre_comm)
         end
         for (k2, v2) in all_communities_aggregated[trim+1]
-            set_user2 = union(set_user2, all_communities_aggregated[trim+1][k2])  
+            post_comm = all_communities_aggregated[trim+1][k2]
+            post_comm = [get_vertex_meta(hgs_reddit_labelled[trim+1], elem) for elem in post_comm]
+            set_user2 = union(set_user2, post_comm)  
         end
         possible_ghost = setdiff(set_user1, set_user2)
         # if length(possible_ghost) > 0
@@ -118,5 +136,7 @@ for trim in 1:7
         # end
     end
 end
+
+
 
 ############################################

@@ -256,9 +256,9 @@ function build_all_hgs_labeled_stackoverflow(dfs_processed_stackoverflow, dfs_ra
                     s = ""
                     my_row = first(temp_df)
                     if ismissing(my_row.owner_display_name)
-                        s = string(my_row.owner_user_id)
+                        s = s * string(my_row.owner_user_id)
                     else
-                        s = string(my_row.owner_display_name)
+                        s = s * string(my_row.owner_display_name)
                     end
                     push!(nodes, x=>v_id)
                     set_vertex_meta!(hg, s, v_id)
@@ -277,9 +277,9 @@ function build_all_hgs_labeled_stackoverflow(dfs_processed_stackoverflow, dfs_ra
                     s = ""
                     my_row = first(temp_df)
                     if ismissing(my_row.q_owner_name)
-                        s = string(my_row.q_owner_id)
+                        s = s * string(my_row.q_owner_id)
                     else
-                        s = string(my_row.q_owner_name)
+                        s = s * string(my_row.q_owner_name)
                     end
                     push!(nodes, x=>v_id)
                     set_vertex_meta!(hg, s, v_id)
