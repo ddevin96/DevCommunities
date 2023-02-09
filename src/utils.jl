@@ -162,7 +162,7 @@ function build_all_hgs_labeled_reddit(dfs_processed_reddit, dfs_raw_reddit)
         df_to_build = population
         raw_df = dfs_raw_reddit[i]
         df_to_build.subreddit = string.(df_to_build.subreddit) # cast subreddit to string
-
+        println("Building hypergraph $i")
         nodes = Dict{Int,Int}()
         nodes_per_edge = Dict{Int,Vector{Int}}()
         # Bool value of vertex, String value of meta info on vertex, String value of meta info on edge
@@ -173,10 +173,12 @@ function build_all_hgs_labeled_reddit(dfs_processed_reddit, dfs_raw_reddit)
             for x in row.custom_arr
                 if !haskey(nodes, x)
                     v_id = SimpleHypergraphs.add_vertex!(hg)
-                    temp_df = raw_df[raw_df.comment_id .== row.comments[position], :author]   
+                    temp_df = raw_df[raw_df.comment_id .== row.comments[position], :author]
+                    s = ""
                     author = string(temp_df[1])
+                    s = s * author
                     push!(nodes, x=>v_id)
-                    set_vertex_meta!(hg, author, v_id)
+                    set_vertex_meta!(hg, s, v_id)
                 end
                 push!(vs, x)
                 position += 1
@@ -184,7 +186,8 @@ function build_all_hgs_labeled_reddit(dfs_processed_reddit, dfs_raw_reddit)
             vs = unique(vs)
             vertices = Dict{Int, Bool}(nodes[v] => true for v in vs)
             he_id = SimpleHypergraphs.add_hyperedge!(hg; vertices = vertices)
-            SimpleHypergraphs.set_hyperedge_meta!(hg, row.subreddit, he_id)
+            r = "" * row.subreddit
+            SimpleHypergraphs.set_hyperedge_meta!(hg, r, he_id)
             push!(nodes_per_edge, he_id => vs)  
         end
         push!(hgs_labeled, hg)
@@ -195,6 +198,7 @@ end
 function build_all_hgs_labeled_stackoverflow(dfs_processed_stackoverflow, dfs_raw_stackoverflow)
     hgs_labeled = []
     for i in 1:8
+        println("Building hypergraph $i")
         population = combine(groupby(dfs_processed_stackoverflow[i], :question_id), 
             :new_id => Base.vect∘my_aggregator => :custom_arr,
             :tags => Base.vect∘my_aggregator => :tags,
@@ -301,6 +305,7 @@ end
 function community_detection(hgs)
     communities = []
     for i in 1:8
+        println("Building communities of hg $i")
         b = SimpleHypergraphs.BipartiteView(hgs[i])
         cc = connected_components(b)
         comm_sizes = [length(comm) for comm in cc]
@@ -342,4 +347,77 @@ function community_detection(hgs)
         push!(communities, c)
     end
     return communities
+end
+
+# temporal_communities(cds, 0.05) # 5% of top communities
+function temporal_communities(communities, perc)
+    temporal_comms = []
+    percentages = []
+    for i in 1:8
+        sorted_communities_by_size = sort(communities[i].np, by=length, rev=true)
+        # pick the top perc of communities
+        percentage = length(communities[i].np) * perc
+        percentage = trunc(Int, percentage)
+        push!(percentages, percentage)
+        top_comms = sorted_communities_by_size[1:percentage]
+        push!(temporal_comms, top_comms)
+    end
+    return temporal_comms, percentages
+end
+
+function t_communities_aggregation_reddit(temporal_comms, percentages, my_tags, dfs_processed_reddit)
+    all_tags = []
+    for trim in 1:8
+        tags = Dict()
+        for i in 1:percentages[trim]
+            temporal_community = temporal_comms[trim][i]
+            tag_d = Dict()
+            for user in temporal_community
+                # retrieve all the tags of the user
+                mydf = dfs_processed_reddit[trim]
+                temp_df = mydf[mydf.new_id .== user, :]
+                # retrieve all the tags of the user
+                for tag in my_tags
+                    if tag in temp_df.subreddit
+                        if !haskey(tag_d, tag)
+                            tag_d[tag] = 0
+                        end
+                        tag_d[tag] += 1
+                    end
+                end
+            end
+            max_tag = ""
+            max_tag_count = 0
+            for (k, v) in tag_d
+                if v > max_tag_count
+                    max_tag = k
+                    max_tag_count = v
+                end
+            end
+            if max_tag == ""
+                continue
+            end
+            if !haskey(tags, max_tag)
+                tags[max_tag] = []
+            end
+            # append the community to the tag
+            push!(tags[max_tag], temporal_community)
+        end
+        push!(all_tags, tags)
+    end
+    
+    all_communities_aggregated = []
+    for trim in 1:8
+        communities_aggregated = Dict()
+        for (k, v) in all_tags[trim]
+            if !haskey(communities_aggregated, k)
+                communities_aggregated[k] = Set()
+            end
+            for community in v
+                communities_aggregated[k] = union(communities_aggregated[k], community)
+            end            
+        end
+        push!(all_communities_aggregated, communities_aggregated)
+    end
+    return all_communities_aggregated
 end
