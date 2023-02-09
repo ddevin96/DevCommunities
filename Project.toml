@@ -1,6 +1,6 @@
 name = "DevCommunities"
 uuid = "611ec51d-2e1a-42b6-884e-8c61fa40c040"
-authors = ["ddevin96 <danieledevinco1996@gmail.com>"]
+authors = ["Daniele De Vinco <ddevinco@unisa.it>", "Alessia Antelmi <aantelmi@unisa.it>"]
 version = "0.1.0"
 
 [deps]

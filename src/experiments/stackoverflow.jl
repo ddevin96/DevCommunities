@@ -30,3 +30,19 @@ cds_stackoverflow = community_detection(hgs_stackoverflow_labelled)
 ############################################
 
 my_tags = ["rust" "elixir" "clojure" "typescript" "julia" "python" "delphi" "go" "sql" "c#" "kotlin" "swift" "dart" "html" "solidity" "javascript" "f#" "bash" "lisp" "apl"]
+
+##
+## stats on hgs and dfs
+## 
+
+# operations on hgs
+dimension_hgs_bar_chart(hgs_stackoverflow)
+size_distribution_chart(hgs_stackoverflow)
+degree_distribution_chart(hgs_stackoverflow)
+
+# operations on dfs processed
+popularity_stackoverflow(dfs_processed_stackoverflow)
+total_user_x_tag_stackoverflow(dfs_processed_stackoverflow)
+user_x_tag_over_time_stackoverflow(dfs_processed_stackoverflow)
+span_hours_stackoverflow(dfs_processed_stackoverflow)
+mean_total_comments_stackoverflow(dfs_processed_stackoverflow)

@@ -29,6 +29,7 @@ include("lp.jl")
 
 export dimension_hgs_bar_chart, size_distribution_chart, degree_distribution_chart, single_distribution_degree
 export popularity_reddit, span_hours_reddit, total_user_x_subreddit, user_x_tag_over_time_reddit, mean_total_comment_reddit
+export popularity_stackoverflow, span_hours_stackoverflow, total_user_x_tag_stackoverflow, user_x_tag_over_time_stackoverflow, mean_total_comments_stackoverflow
 include("plots/plots_reddit.jl")
 include("plots/plots_stackoverflow.jl")
 include("plots/common.jl")
