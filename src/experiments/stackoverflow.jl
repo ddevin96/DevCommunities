@@ -24,16 +24,11 @@ my_tags_so = ["rust" "elixir" "clojure" "typescript" "julia" "python" "delphi" "
 cds_stackoverflow = community_detection(hgs_stackoverflow_labelled)
 qs = quantiles(cds_stackoverflow, "stackoverflow")
 
-temporal_comms, percentages = temporal_communities(cds_stackoverflow, 0.05)
-all_communities_aggregated, all_tags = t_communities_aggregation_stackoverflow(temporal_comms, percentages, my_tags_so, dfs_processed_stackoverflow)
+temporal_comms_s, percentages_s = temporal_communities(cds_stackoverflow, 0.05)
+all_communities_aggregated_s, all_tags = t_communities_aggregation_stackoverflow(temporal_comms_s, percentages_s, my_tags_so, dfs_processed_stackoverflow)
 
-for trim in 1:8
-    for (k, v) in all_communities_aggregated[trim]
-        println("Trim: ", trim, " - Community: ", k, " - Size: ", length(v))
-    end
-end
-
-communities_between_trimesters(all_communities_aggregated, hgs_stackoverflow_labelled, "stackoverflow")
+communities_between_trimesters(all_communities_aggregated_s, hgs_stackoverflow_labelled, "stackoverflow")
+sankey(all_communities_aggregated_s, hgs_stackoverflow_labelled, "stackoverflow")
 
 ############################################
 
@@ -104,3 +99,22 @@ communities_between_trimesters(all_communities_aggregated, hgs_stackoverflow_lab
 
 # population = select(population, Not(:tags))
 # population
+
+open("results/stackoverflow/tags_x_communities.txt", "w") do io
+    for tag in my_tags_so
+        write(io, tag * ",")
+        for trim in 1:8
+            if haskey(all_communities_aggregated_s[trim], tag)
+                write(io, string(length(all_communities_aggregated_s[trim][tag]))*",")
+            else
+                write(io, "0,")
+            end
+        end
+        write(io, "\n")
+    end
+end
+
+for trim in 1:8
+    print(length(cds_stackoverflow[trim].np))
+    print(",")
+end
