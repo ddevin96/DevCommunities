@@ -436,25 +436,35 @@ end
 function t_communities_aggregation_stackoverflow(temporal_comms, percentages, my_tags, dfs_processed_stackoverflow)
     all_tags = []
     for trim in 1:8
+        println("trim: ", trim)
         tags = Dict()
+        df_id = build_tagged_df_new_id(dfs_processed_stackoverflow[trim], my_tags)
+        df_q_id = build_tagged_df_q_new_id(dfs_processed_stackoverflow[trim], my_tags)
+
         for i in 1:percentages[trim]
             temporal_community = temporal_comms[trim][i]
             tag_d = Dict()
             for user in temporal_community
                 # retrieve all the tags of the user
-                mydf = dfs_processed_stackoverflow[trim]
+                # mydf = dfs_processed_stackoverflow[trim]
                 # display(mydf)
-                temp_df = mydf[mydf.new_id .== user, :]
-                temp_df2 = mydf[mydf.q_new_id .== user, :]
-                temp_df = vcat(temp_df, temp_df2)
+                df1 = df_id[df_id.new_id .== user, :]
+                df2 = df_q_id[df_q_id.q_new_id .== user, :]
+                # df1 = df1[:, :tags2]
+                # df2 = df2[:, :tags2]
+                df1 = select(df1, :tags2)
+                df2 = select(df2, :tags2)
+                temp_df = vcat(df1, df2)
                 # retrieve all the tags of the user
-                for x in temp_df.tags
+                for x in temp_df.tags2
                     for tag in my_tags
-                        if occursin(tag, x)
-                            if !haskey(tag_d, tag)
-                                tag_d[tag] = 0
+                        for arr in x
+                            if occursin(tag, arr)
+                                if !haskey(tag_d, tag)
+                                    tag_d[tag] = 0
+                                end
+                                tag_d[tag] += 1
                             end
-                            tag_d[tag] += 1
                         end
                     end
                 end
@@ -468,6 +478,8 @@ function t_communities_aggregation_stackoverflow(temporal_comms, percentages, my
                 end
             end
             if max_tag == ""
+                # println(tag_d)
+                println(temporal_community)
                 continue
             end
             if !haskey(tags, max_tag)
@@ -494,10 +506,80 @@ function t_communities_aggregation_stackoverflow(temporal_comms, percentages, my
     end
     return all_communities_aggregated, all_tags
 end
+
+function build_tagged_df_new_id(df, my_tags)
+    population = combine(groupby(df, :new_id), 
+                    :tags => Base.vect∘my_aggregator => :tags,
+                    # :q_new_id => Base.vect∘my_aggregator => :q_custom_arr,
+                    )
+
+    population.tags = [unique(x) for x in population.tags]
+    new_tags = []
+    for row in eachrow(population)
+        found = false
+        my_new_tags = []
+        for x in row.tags
+            for tag in my_tags
+                if occursin(tag, x)
+                    push!(my_new_tags, tag)
+                    found = true
+                elseif tag == "go"
+                    if occursin("|go", x) || occursin("go|", x) || x == "go"
+                        push!(my_new_tags, tag)
+                        found = true
+                    end
+                end
+            end
+            if !found
+                push!(my_new_tags, "other")
+            end
+        end
+        push!(new_tags, my_new_tags)
+    end
+
+    population[!, :tags2] = new_tags 
+    population = select(population, Not(:tags))
+    return population
+end
+
+function build_tagged_df_q_new_id(df, my_tags)
+    population = combine(groupby(df, :q_new_id), 
+                    :tags => Base.vect∘my_aggregator => :tags,
+                    # :new_id => Base.vect∘my_aggregator => :custom_arr,
+                    )
+
+    population.tags = [unique(x) for x in population.tags]
+    new_tags = []
+    for row in eachrow(population)
+        found = false
+        my_new_tags = []
+        for x in row.tags
+            for tag in my_tags
+                if occursin(tag, x)
+                    push!(my_new_tags, tag)
+                    found = true
+                elseif tag == "go"
+                    if occursin("|go", x) || occursin("go|", x) || x == "go"
+                        push!(my_new_tags, tag)
+                        found = true
+                    end
+                end
+            end
+            if !found
+                push!(my_new_tags, "other")
+            end
+        end
+        push!(new_tags, my_new_tags)
+    end
+
+    population[!, :tags2] = new_tags 
+    population = select(population, Not(:tags))
+    return population
+end
 # confront the tags of each community between consecutive trimester
-function communities_between_trimesters(all_communities_aggregated, hgs)
+function communities_between_trimesters(all_communities_aggregated, hgs, name_dataset)
     for trim in 1:7
-        open("results/reddit/redditsankeytrim"*string(trim)*"trim"*string(trim+1)*".txt", "w") do io
+        open("results/" * name_dataset * "/redditsankeytrim"*string(trim)*"trim"*string(trim+1)*".txt", "w") do io
             write(io, "intersection\n")
             for (k, v) in all_communities_aggregated[trim]
                 if haskey(all_communities_aggregated[trim+1], k)

@@ -19,13 +19,13 @@ check_hgs_labelled(hgs_stackoverflow_labelled)
 ##
 ## community detection
 ##
-my_tags = ["rust" "elixir" "clojure" "typescript" "julia" "python" "delphi" "go" "sql" "c#" "kotlin" "swift" "dart" "html" "solidity" "javascript" "f#" "bash" "lisp" "apl"]
+my_tags_so = ["rust" "elixir" "clojure" "typescript" "julia" "python" "delphi" "go" "sql" "c#" "kotlin" "swift" "dart" "html" "solidity" "javascript" "f#" "bash" "lisp" "apl"]
 
 cds_stackoverflow = community_detection(hgs_stackoverflow_labelled)
 qs = quantiles(cds_stackoverflow, "stackoverflow")
 
 temporal_comms, percentages = temporal_communities(cds_stackoverflow, 0.05)
-all_communities_aggregated, all_tags = t_communities_aggregation_stackoverflow(temporal_comms, percentages, my_tags, dfs_processed_stackoverflow)
+all_communities_aggregated, all_tags = t_communities_aggregation_stackoverflow(temporal_comms, percentages, my_tags_so, dfs_processed_stackoverflow)
 
 for trim in 1:8
     for (k, v) in all_communities_aggregated[trim]
@@ -33,11 +33,8 @@ for trim in 1:8
     end
 end
 
-for trim in 1:8
-    for (k, v) in all_tags[trim]
-        println("Trim: ", trim, " - Community: ", k, " - Size: ", length(v))
-    end
-end
+communities_between_trimesters(all_communities_aggregated, hgs_stackoverflow_labelled, "stackoverflow")
+
 ############################################
 
 ##
@@ -57,3 +54,53 @@ end
 # mean_total_comments_stackoverflow(dfs_processed_stackoverflow)
 
 ############################################
+
+## random stuff for debugging
+# using SimpleHypergraphs
+# using DataFrames
+# population = combine(groupby(dfs_processed_stackoverflow[1], :new_id), 
+#                 :tags => Base.vect∘my_aggregator => :tags,
+#                 :q_new_id => Base.vect∘my_aggregator => :q_custom_arr,
+#                 )
+        
+# population.tags = [unique(x) for x in population.tags]
+# # printf first row of population
+# population
+# # a = []
+# new_tags = []
+# for row in eachrow(population)
+#     found = false
+#     my_new_tags = []
+#     for x in row.tags
+#         for tag in my_tags
+#             # println("tag: ", tag, " - x: ", x)
+#             if occursin(tag, x)
+#                 # push!(a, row.custom_arr)
+#                 push!(my_new_tags, tag)
+#                 found = true
+#             elseif tag == "go"
+#                 if occursin("|go", x) || occursin("go|", x) || x == "go"
+#                     # push!(a, row.custom_arr)
+#                     push!(my_new_tags, tag)
+#                     found = true
+#                 end
+#             end
+#         end
+#         break
+#         if !found
+#             # # push!(a, row.custom_arr)
+#             push!(my_new_tags, "other")
+#             # found = true
+#         end
+#     break
+#     end
+#     push!(new_tags, my_new_tags)
+# # findfirst(x->occursin(x, population[1, :tags]), my_tags)
+# # popularity[!, tag] = [count(x->occursin(tag, x), x) for x in popularity.tags]
+# end
+
+# population[!, :tags2] = new_tags # 166523
+# # drop tags column 
+
+# population = select(population, Not(:tags))
+# population

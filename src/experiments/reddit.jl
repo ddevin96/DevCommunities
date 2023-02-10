@@ -32,7 +32,7 @@ all_communities_aggregated = t_communities_aggregation_reddit(temporal_comms, pe
 
 # confront the tags of each community between consecutive trimester
 # sankey stuff || write to results/reddit/redditsankeytrim1trim2.txt
-communities_between_trimesters(all_communities_aggregated, hgs_reddit_labelled)
+communities_between_trimesters(all_communities_aggregated, hgs_reddit_labelled, "reddit")
 
 ############################################
 
