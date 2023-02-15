@@ -13,6 +13,7 @@ using Graphs
 export build_hg, build_all_hgs
 export build_df, build_all_dfs, build_raw_dfs
 export build_all_hgs_labeled_reddit, build_all_hgs_labeled_stackoverflow
+export degree_histogram
 export my_aggregator, my_trick, string_aggregator
 export myfindcommunities, community_detection
 export check_hgs_labelled
