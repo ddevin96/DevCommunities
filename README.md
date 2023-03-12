@@ -1,6 +1,6 @@
 # DevCommunities detection
-
-WIP
+data available on [Zenodo](https://zenodo.org/record/7685062)
+WIP - providing a notebook 
 
 ```bash
 .
