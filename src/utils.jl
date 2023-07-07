@@ -29,7 +29,9 @@ end
 function build_all_hgs(name_dataset)
     hgs = []
     for i in 1:8
+        # notebook
         # path = "../../data/" * name_dataset * "/processed/trimestre" * string(i) * "/hyperedges.txt"
+        # local
         path = "data/" * name_dataset * "/processed/trimestre" * string(i) * "/hyperedges.txt"
         hg = build_hg(path)
         push!(hgs, hg)
@@ -45,6 +47,9 @@ end
 function build_all_dfs(name_dataset)
     dfs = []
     for i in 1:8
+        # notebook
+        # path = "../../data/" * name_dataset * "/processed/trimestre" * string(i) * "/processed.csv"
+        # local
         path = "data/" * name_dataset * "/processed/trimestre" * string(i) * "/processed.csv"
         df = DataFrame(CSV.File(path))
         if name_dataset == "reddit"
@@ -58,7 +63,10 @@ end
 function build_raw_dfs(name_dataset)
     dfs = []
     for i in 1:8
-        println("$i")
+        # println("$i")
+        # notebook
+        # path = "../../data/" * name_dataset * "/raw_data/trimestre" * string(i) * ".csv"
+        # local
         path = "data/" * name_dataset * "/raw_data/trimestre" * string(i) * ".csv"
         df = DataFrame(CSV.File(path))
         if name_dataset == "reddit"
@@ -163,7 +171,7 @@ function build_all_hgs_labeled_reddit(dfs_processed_reddit, dfs_raw_reddit)
         df_to_build = population
         raw_df = dfs_raw_reddit[i]
         df_to_build.subreddit = string.(df_to_build.subreddit) # cast subreddit to string
-        println("Building hypergraph $i")
+        # println("Building hypergraph $i")
         nodes = Dict{Int,Int}()
         nodes_per_edge = Dict{Int,Vector{Int}}()
         # Bool value of vertex, String value of meta info on vertex, String value of meta info on edge
@@ -302,7 +310,7 @@ end
 function community_detection(hgs)
     communities = []
     for i in 1:8
-        println("Building communities of hg $i")
+        # println("Building communities of hg $i")
         b = SimpleHypergraphs.BipartiteView(hgs[i])
         cc = connected_components(b)
         comm_sizes = [length(comm) for comm in cc]

@@ -54,3 +54,15 @@ span_hours_reddit(dfs_processed_reddit)
 mean_total_comment_reddit(dfs_processed_reddit)
 
 ############################################
+
+for i in 1:8
+    dict_degree = degree_histogram(hgs_reddit[i][1], normalized=false)
+    sorted_degree = sort(collect(dict_degree), by=x->x[1])
+    open("results/reddit/degree_trim" * string(i) * "_sorted.csv", "w") do io
+        write(io, "size, normalized\n")
+        for (k, v) in sorted_degree
+            write(io, string(k) * "," * string(v) * "\n")
+        end
+    end
+end
+# single_distribution_degree(hgs_reddit[1][1])

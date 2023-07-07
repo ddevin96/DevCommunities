@@ -50,3 +50,14 @@ span_hours_stackoverflow(dfs_processed_stackoverflow)
 mean_total_comments_stackoverflow(dfs_processed_stackoverflow)
 
 ############################################
+
+for i in 1:8
+    dict_degree = degree_histogram(hgs_stackoverflow[i][1], normalized=false)
+    sorted_degree = sort(collect(dict_degree), by=x->x[1])
+    open("results/stackoverflow/degree_trim" * string(i) * "_sorted.csv", "w") do io
+        write(io, "size, normalized\n")
+        for (k, v) in sorted_degree
+            write(io, string(k) * "," * string(v) * "\n")
+        end
+    end
+end
