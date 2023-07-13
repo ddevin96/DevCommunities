@@ -47,8 +47,9 @@
 All the data used for the paper are available on [Zenodo](https://zenodo.org/record/7685062)
 
 # Publications
+```latex
    @inproceedings{10.1145/3543873.3587673,
-      author = {Antelmi, Alessia and Cordasco, Gennaro and De Vinco, Daniele and Spagnuolo, Carmine},
+      author = {Antelmi, Alessia and Cordasco, Gennaro and De Vinco Daniele and Spagnuolo, Carmine},
       title = {The Age of Snippet Programming: Toward Understanding Developer Communities in Stack Overflow and Reddit},
       year = {2023},
       isbn = {9781450394192},
@@ -62,3 +63,4 @@ All the data used for the paper are available on [Zenodo](https://zenodo.org/rec
       location = {Austin, TX, USA},
       series = {WWW '23 Companion}
    }
+```
