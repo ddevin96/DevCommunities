@@ -23,8 +23,9 @@ docs/site/
 # environment.
 Manifest.toml
 
-data/
+# data/
 results/
+so_data/
 
 .vscode/
 test.jl
