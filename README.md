@@ -1,3 +1,9 @@
+
+# DATA
+
+All the data used for the paper are available on [Zenodo](https://zenodo.org/record/7685062)
+The structure of the data is the following:
+
 ```bash
 .
 ├── data
@@ -42,10 +48,6 @@
    │  └── plots_stackoverflow.jl
    └── utils.jl
 ```
-# DATA
-
-All the data used for the paper are available on [Zenodo](https://zenodo.org/record/7685062)
-
 # Publications
 
 If you find these experiments useful or interesting, please cite our paper:
