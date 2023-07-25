@@ -29,3 +29,6 @@ so_data/
 
 .vscode/
 test.jl
+data/stackoverflow/raw_data/dueanni.csv
+hgs_old/
+hgs/
