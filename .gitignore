@@ -27,8 +27,9 @@ Manifest.toml
 results/
 so_data/
 
+*.DS_Store
+
 .vscode/
-test.jl
 data/stackoverflow/raw_data/dueanni.csv
 hgs_old/
 hgs/
