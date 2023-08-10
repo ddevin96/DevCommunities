@@ -24,7 +24,6 @@ docs/site/
 Manifest.toml
 
 # data/
-results/
 so_data/
 
 *.DS_Store
