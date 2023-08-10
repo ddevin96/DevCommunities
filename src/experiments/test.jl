@@ -145,7 +145,7 @@ function index(id)
     return hc[id]
 end
 
-dir = "./hgs"
+dir = "./randoms"
 # for each file in dir open the file
 for file in readdir(dir)
     hc = Dict{Int,Int}()
