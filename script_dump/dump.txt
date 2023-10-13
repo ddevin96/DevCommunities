@@ -1,0 +1,9 @@
+# of nodes: 1394
+# of hyperedges: 2602
+Reading data done: 0.165607 sec
+------------------------------------------
+
+Adjacency list construction done: 3.97996 sec
+------------------------------------------
+
+Hyperedge: 0 / 2602
