@@ -24,6 +24,77 @@ function build_hg(path)
     return hg, nodes, nodes_per_edge
 end
 
+function build_hg_randoms(path)
+
+    nodes = Dict{Int,Int}()
+    degree_nodes = Dict{Int,Int}()
+    nodes_per_edge = Dict{Int,Vector{Int}}()
+
+    hg = Hypergraph(0,0)
+
+    for line in eachline(path)
+        # split elemnts of the line by comma
+        d = split(line, ",")
+        vs = map(x -> parse(Int,(strip(replace(x, r"\[|\]" => "")))), d)
+        for v in vs
+            if !haskey(nodes, v)
+                v_id = SimpleHypergraphs.add_vertex!(hg)
+                push!(nodes, v=>v_id)
+            end
+        end
+        # add he 
+        vertices = Dict{Int, Bool}(nodes[v] => true for v in vs)
+
+        # count degree of each node
+        for v in vs
+            if !haskey(degree_nodes, v)
+                degree_nodes[v] = 0
+            end
+            degree_nodes[v] += 1
+        end
+        
+        he_id = SimpleHypergraphs.add_hyperedge!(hg; vertices = vertices)
+        push!(nodes_per_edge, he_id => vs)  
+    end
+
+    random_nodes = Dict{Int,Int}()
+    random_nodes_per_edge = Dict{Int,Vector{Int}}()
+
+    random_hg = Hypergraph(0,0)
+
+    sum_degree_nodes = sum(values(degree_nodes))
+    sum_degree_edges = sum(values(length(nodes_per_edge)))
+
+    function prob_nodes(v)
+        return degree_nodes[v]/sum_degree_nodes
+    end
+
+    function prob_edges(e)
+        return length(nodes_per_edge[e])/sum_degree_edges
+    end
+
+    random_nodes_probs = Dict{Int,Float64}()
+    random_edges_probs = Dict{Int,Float64}()
+
+    for key in keys(nodes)
+        pr = prob_nodes(key)
+        random_nodes_probs[key] = pr
+    end
+
+    for key in keys(nodes_per_edge)
+        pr = prob_edges(key)
+        random_edges_probs[key] = pr
+    end
+
+    sample_nodes = sample(keys(random_nodes_probs), Weights(values(random_nodes_probs)))
+    sample_edges = sample(keys(random_edges_probs), Weights(values(random_edges_probs)))
+
+    println("Sample nodes: $sample_nodes")
+    println("Sample edges: $sample_edges")
+
+    return hg, nodes, nodes_per_edge
+end
+
 # name of the folder containing the dataset
 # follow the readme for the structure of the folder 
 function build_all_hgs(name_dataset)
