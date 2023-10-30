@@ -1,5 +1,7 @@
-# of nodes: 288395
-# of hyperedges: 376461
-Reading data done: 0.306003 sec
+Sampling size: 10000
+
+# of nodes: 125042
+# of hyperedges: 134089
+Reading data done: 0.0930766 sec
 ------------------------------------------
 
