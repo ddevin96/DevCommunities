@@ -1,0 +1,5 @@
+# of nodes: 288395
+# of hyperedges: 376461
+Reading data done: 0.306003 sec
+------------------------------------------
+

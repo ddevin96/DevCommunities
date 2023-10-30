@@ -15,7 +15,7 @@ path = str(sys.argv[1])
 num_edges = int(sys.argv[2])
 # print("path: ", path)
 # print("num_edges: ", num_edges)
-porcodio = 0
+# porcodio = 0
 # open file and read the content in a list
 w_file = open("/Users/ddevin/Documents/vscode/DevCommunities/randoms/randomPIPE.hg", "w")
 with open(path, "r") as f:
@@ -28,10 +28,10 @@ with open(path, "r") as f:
         ids = list(map(index, ids))
         new_line = ','.join(map(str, ids))
         w_file.write(new_line + '\n')
-        porcodio += 1
-        if porcodio == num_edges:
-            # print("counter: ", porcodio)
-            # print("num_edges: ", num_edges)
-            break
+        # porcodio += 1
+        # if porcodio == num_edges:
+        #     # print("counter: ", porcodio)
+        #     # print("num_edges: ", num_edges)
+        #     break
 
 w_file.close()
