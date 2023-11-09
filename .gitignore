@@ -25,6 +25,7 @@ Manifest.toml
 
 # data/
 so_data/
+data/
 
 *.DS_Store
 
