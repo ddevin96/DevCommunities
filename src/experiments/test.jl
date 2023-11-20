@@ -1,5 +1,6 @@
 using DataFrames, CSV
 using SimpleHypergraphs
+using Plots
 
 # question_id,creation_date,score,tags,answer_count,start_question,last_activity_date,new_id,q_new_id
 # 64200204,2022-08-05 11:41:18.263000+00:00,0,javascript|reactjs,1,2020-10-04 21:45:29.010000+00:00,2022-08-05 11:41:18.263000+00:00,0,2783
@@ -26,6 +27,44 @@ end
 # popularity = combine(groupby(popularity, :tags), 
 #                 :custom_arr => Base.vect∘my_aggregator => :custom_arr)
 
+most_active_user = Dict()
+for row in eachrow(df)
+    if !haskey(most_active_user, row.new_id)
+        most_active_user[row.new_id] = 0
+    end
+    most_active_user[row.new_id] += 1
+    # if !haskey(most_active_user, row.q_new_id)
+    #     most_active_user[row.q_new_id] = 0
+    # end
+    # most_active_user[row.q_new_id] += 1
+end
+
+# plot histogram of most active user
+histogram(collect(values(most_active_user)), bins=100, yscale=:log10, xlabel="Number of questions", ylabel="Number of users", title="Histogram of most active users")
+
+# array of unique values of most active users plus occurence
+# most_active_user = sort(collect(most_active_user), by=x->x[2], rev=true)
+# collect occurances of values in most_active_user
+occurs_users = Dict()
+for x in most_active_user
+    if !haskey(occurs_users, x[2])
+        occurs_users[x[2]] = 0
+    end
+    occurs_users[x[2]] += 1
+end
+occurs_users
+sort(collect(occurs_users), by=x->x[1], rev=true)
+
+# remove users with less than 2 questions from population
+df_1 = DataFrame()
+for row in eachrow(df)
+    if most_active_user[row.new_id] < 2
+        continue
+        # delete!(df_1, row)
+    end
+    push!(df_1, row)
+end
+df_1
 
 my_tags = ["rust" "elixir" "clojure" "typescript" "julia" "python" "delphi" "go" "sql" "c#" "kotlin" "swift" "dart" "html" "solidity" "javascript" "f#" "bash" "lisp" "apl"]
 total_map = Dict()
@@ -33,16 +72,28 @@ for tag in my_tags
     total_map[tag] = []
 end
 
-population = combine(groupby(df, :question_id), 
+# population = combine(groupby(df, :question_id), 
+#         :new_id => Base.vect∘my_aggregator => :custom_arr,
+#         :tags => Base.vect∘my_aggregator => :tags,
+#         :q_new_id => Base.vect∘my_aggregator => :q_custom_arr,
+#         )
+population_filtered = combine(groupby(df_1, :question_id), 
         :new_id => Base.vect∘my_aggregator => :custom_arr,
         :tags => Base.vect∘my_aggregator => :tags,
         :q_new_id => Base.vect∘my_aggregator => :q_custom_arr,
         )
 
-population.tags = [unique(x) for x in population.tags]
+# remove lines with custom_arr of length 1
+population_filtered = population_filtered[findall(x->length(x) > 1, population_filtered.custom_arr), :]
+
+
+# population.tags = [unique(x) for x in population.tags]
+population_filtered.tags = [unique(x) for x in population_filtered.tags]
+
 # printf first row of population
 # population[1:10, :]
 # a = []
+population = population_filtered
 new_tags = []
 for row in eachrow(population)
     found = false
@@ -128,7 +179,7 @@ end
 counter = 1
 for hg in hgs
     s = my_tags[counter]
-    hg_save("./hgs/$s", hg)
+    hg_save("./hgsFilter/$s", hg)
     counter += 1
 end
 
@@ -145,36 +196,52 @@ function index(id)
     return hc[id]
 end
 
-dir = "./randoms"
-# for each file in dir open the file
-for file in readdir(dir)
-    hc = Dict{Int,Int}()
-    counter_id = 0
+# dir = "./randoms"
+# # for each file in dir open the file
+# for file in readdir(dir)
+#     hc = Dict{Int,Int}()
+#     counter_id = 0
     
-    if !endswith(file, ".hg")
-        path = joinpath(dir, file)
-        f = open(path, "r")
-        w = open(string(path,".hg"), "w")
+#     if !endswith(file, ".hg")
+#         path = joinpath(dir, file)
+#         f = open(path, "r")
+#         w = open(string(path,".hg"), "w")
 
-        skip_first_line = true # skip number of nodes and edges
-        for line in eachline(f)
-            if skip_first_line
-                skip_first_line = false
-                continue
-            end
-            # find numbers in line
-            numbers = [parse(Int, x) for x in split(line, ",") if occursin(r"^\d+$", x)]
-            # remap id
-            new_line = [index(x) for x in numbers]
-            l = join(new_line, ",")
-            # add \n to the end of line
-            new_line = string(l, "\n")
-            write(w, new_line)
-        end
-        close(f)
-        close(w)
+#         skip_first_line = true # skip number of nodes and edges
+#         for line in eachline(f)
+#             if skip_first_line
+#                 skip_first_line = false
+#                 continue
+#             end
+#             # find numbers in line
+#             numbers = [parse(Int, x) for x in split(line, ",") if occursin(r"^\d+$", x)]
+#             # remap id
+#             new_line = [index(x) for x in numbers]
+#             l = join(new_line, ",")
+#             # add \n to the end of line
+#             new_line = string(l, "\n")
+#             write(w, new_line)
+#         end
+#         close(f)
+#         close(w)
+#     end
+# end
+dir = "./hgsFilter"
+for file in readdir(dir)
+    if !endswith(file, ".hg")
+        # println(file)
+        s = "././hgsFilter/"*file
+        # make a copy of the file
+        run(`cp $s $s.copy`)
+        # # substitue in each line "=true" with ","
+        run(`sed -i '' 's/=true/,/g' $s`)
+        # # remove first line
+        run(`sed -i '' '1d' $s`)
+        # # hash and rewriting id
+        run(`python3 ./src/experiments/rewriteCC.py $s`)
     end
 end
+
 
 
 # path_apl = "./hgs/apl"
