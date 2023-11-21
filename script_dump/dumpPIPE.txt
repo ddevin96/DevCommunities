@@ -1,7 +1,37 @@
 Sampling size: 10000
 
-# of nodes: 125042
-# of hyperedges: 134089
-Reading data done: 0.0930766 sec
+# of nodes: 20890
+# of hyperedges: 11483
+Reading data done: 0.00769571 sec
 ------------------------------------------
 
+# of hyperwedges: 318442
+Adjacency list construction done: 0.0127295 sec
+------------------------------------------
+
+h-motif 1: 106
+h-motif 2: 30211781
+h-motif 3: 0
+h-motif 4: 0
+h-motif 5: 15805
+h-motif 6: 469957
+h-motif 7: 0
+h-motif 8: 0
+h-motif 9: 11
+h-motif 10: 32
+h-motif 11: 287
+h-motif 12: 690
+h-motif 13: 0
+h-motif 14: 0
+h-motif 15: 0
+h-motif 16: 0
+h-motif 17: 0
+h-motif 18: 0
+h-motif 19: 175
+h-motif 20: 303
+h-motif 21: 64564
+h-motif 22: 5390507
+h-motif 23: 0
+h-motif 24: 11
+h-motif 25: 96
+h-motif 26: 2940
