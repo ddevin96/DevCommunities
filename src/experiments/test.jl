@@ -1,7 +1,7 @@
 using DataFrames, CSV
 using SimpleHypergraphs
 using Plots
-
+using Graphs
 # question_id,creation_date,score,tags,answer_count,start_question,last_activity_date,new_id,q_new_id
 # 64200204,2022-08-05 11:41:18.263000+00:00,0,javascript|reactjs,1,2020-10-04 21:45:29.010000+00:00,2022-08-05 11:41:18.263000+00:00,0,2783
 
@@ -13,6 +13,47 @@ function my_aggregator(p)
         push!(result, p[i])
     end
     result
+end
+
+function my_pruning(hg)
+    
+    b = SimpleHypergraphs.BipartiteView(hg)
+    cc = connected_components(b)
+    comm_sizes = [length(comm) for comm in cc]
+    isolated_components = []
+    # sort cc by length
+    cc = sort(cc, by=length, rev=true)
+
+    for comp in cc[2:length(cc)]
+        append!(isolated_components, comp)
+    end
+
+    hg_no_isolated = deepcopy(hg)
+
+    for v in Iterators.reverse(isolated_components)
+        v > nhv(hg) && continue
+        remove_vertex!(hg_no_isolated, Int(v))
+    end
+
+    hyperedges = [e for e in 1:nhe(hg_no_isolated) if length(getvertices(hg_no_isolated, e)) == 0]
+
+    # remove empty hyperedges
+    for he in Iterators.reverse(hyperedges)
+        remove_hyperedge!(hg_no_isolated, he)
+    end
+
+    for he in Iterators.reverse(1:nhe(hg_no_isolated))
+        for v in Iterators.reverse(collect(keys(getvertices(hg_no_isolated, he))))
+            if v > nhv(hg_no_isolated)
+                remove_hyperedge!(hg_no_isolated, he)
+                break
+            end
+        end
+    end
+
+    # prune because i lose some vertices # rip heroes
+    prune_hypergraph!(hg_no_isolated)
+    return hg_no_isolated
 end
 
 # divisi per tag e numero utenti univoci
@@ -27,26 +68,26 @@ end
 # popularity = combine(groupby(popularity, :tags), 
 #                 :custom_arr => Base.vect∘my_aggregator => :custom_arr)
 
-most_active_user = Dict()
+most_active_users = Dict()
 for row in eachrow(df)
-    if !haskey(most_active_user, row.new_id)
-        most_active_user[row.new_id] = 0
+    if !haskey(most_active_users, row.new_id)
+        most_active_users[row.new_id] = 0
     end
-    most_active_user[row.new_id] += 1
-    # if !haskey(most_active_user, row.q_new_id)
-    #     most_active_user[row.q_new_id] = 0
+    most_active_users[row.new_id] += 1
+    # if !haskey(most_active_users, row.q_new_id)
+    #     most_active_users[row.q_new_id] = 0
     # end
-    # most_active_user[row.q_new_id] += 1
+    # most_active_users[row.q_new_id] += 1
 end
 
 # plot histogram of most active user
-histogram(collect(values(most_active_user)), bins=100, yscale=:log10, xlabel="Number of questions", ylabel="Number of users", title="Histogram of most active users")
+histogram(collect(values(most_active_users)), bins=100, yscale=:log10, xlabel="Number of questions", ylabel="Number of users", title="Histogram of most active users")
 
 # array of unique values of most active users plus occurence
-# most_active_user = sort(collect(most_active_user), by=x->x[2], rev=true)
-# collect occurances of values in most_active_user
+# most_active_users = sort(collect(most_active_users), by=x->x[2], rev=true)
+# collect occurances of values in most_active_users
 occurs_users = Dict()
-for x in most_active_user
+for x in most_active_users
     if !haskey(occurs_users, x[2])
         occurs_users[x[2]] = 0
     end
@@ -58,7 +99,7 @@ sort(collect(occurs_users), by=x->x[1], rev=true)
 # remove users with less than 2 questions from population
 df_1 = DataFrame()
 for row in eachrow(df)
-    if most_active_user[row.new_id] < 2
+    if most_active_users[row.new_id] < 2
         continue
         # delete!(df_1, row)
     end
@@ -176,10 +217,39 @@ for tag in my_tags
     end
     push!(hgs, hg)
 end
-counter = 1
+
+
+# considera solo la più grande componente connessa 
+# rimuovi i nodi con grado < DEG
+# rimuovi gli HE vuoti o con solo un nuodo
+hgs_filtered = []
+ccount = 0
 for hg in hgs
+    println("counter: ", ccount)
+    flush(stdout)
+    ccount += 1
+    hg_filtered = my_pruning(hg)
+    # remove vertex with degree < 3
+    for v in Iterators.reverse(1:nhv(hg_filtered))
+        if length(gethyperedges(hg_filtered, v)) < 2
+            remove_vertex!(hg_filtered, v)
+        end
+    end
+    # remove hyperedges with only one vertex
+    for he in Iterators.reverse(1:nhe(hg_filtered))
+        if length(getvertices(hg_filtered, he)) < 2
+            remove_hyperedge!(hg_filtered, he)
+        end
+    end
+    prune_hypergraph!(hg_filtered)
+    push!(hgs_filtered, hg_filtered)
+end
+
+
+counter = 1
+for hg in hgs_filtered
     s = my_tags[counter]
-    hg_save("./hgsFilter/$s", hg)
+    hg_save("./hgsFilterNew/$s", hg)
     counter += 1
 end
 
@@ -226,11 +296,11 @@ end
 #         close(w)
 #     end
 # end
-dir = "./hgsFilter"
+dir = "./hgsFilterNew"
 for file in readdir(dir)
     if !endswith(file, ".hg")
         # println(file)
-        s = "././hgsFilter/"*file
+        s = "././hgsFilterNew/"*file
         # make a copy of the file
         run(`cp $s $s.copy`)
         # # substitue in each line "=true" with ","

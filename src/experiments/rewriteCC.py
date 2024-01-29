@@ -15,7 +15,7 @@ path = str(sys.argv[1])
 # num_edges = int(sys.argv[2])
 # print("path: ", path)
 # print("num_edges: ", num_edges)
-# porcodio = 0
+# counter_edges = 0
 # open file and read the content in a list
 w_file = open(path+".hg", "w")
 with open(path, "r") as f:
@@ -28,9 +28,9 @@ with open(path, "r") as f:
         ids = list(map(index, ids))
         new_line = ','.join(map(str, ids))
         w_file.write(new_line + '\n')
-        # porcodio += 1
-        # if porcodio == num_edges:
-        #     # print("counter: ", porcodio)
+        # counter_edges += 1
+        # if counter_edges == num_edges:
+        #     # print("counter: ", counter_edges)
         #     # print("num_edges: ", num_edges)
         #     break
 
